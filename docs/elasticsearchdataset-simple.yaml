@@ -8,9 +8,22 @@ metadata:
   name: es-data-simple
   namespace: es-operator-demo
 spec:
-  replicas: 1
+  excludeSystemIndices: true
   scaling:
-    enabled: false
+    enabled: true
+    diskUsagePercentScaledownWatermark: 80
+    minReplicas: 3
+    maxReplicas: 100
+    minIndexReplicas: 1
+    maxIndexReplicas: 50
+    minShardsPerNode: 2
+    maxShardsPerNode: 50
+    scaleDownCPUBoundary: 30
+    scaleUpCPUBoundary: 90
+    scaleDownThresholdDurationSeconds: 6
+    scaleUpThresholdDurationSeconds: 30
+    scaleDownCooldownSeconds: 18
+    scaleUpCooldownSeconds: 12
   template:
     metadata:
       labels:
@@ -35,7 +48,7 @@ spec:
           value: "true"
         - name: "ES_JAVA_OPTS"
           value: "-Xmx500m -Xms500m"
-        image: "docker.elastic.co/elasticsearch/elasticsearch-oss:7.0.0"
+        image: "docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2"
         ports:
         - containerPort: 9300
           name: transport
@@ -46,10 +59,10 @@ spec:
           timeoutSeconds: 10
         resources:
           limits:
-            cpu: 100m
+            cpu: 500m
             memory: 800Mi
           requests:
-            cpu: 100m
+            cpu: 500m
             memory: 800Mi
         volumeMounts:
         - mountPath: /usr/share/elasticsearch/data
@@ -57,23 +70,6 @@ spec:
         - name: elasticsearch-config
           mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
           subPath: elasticsearch.yml
-      initContainers:
-      - command:
-        - sysctl
-        - -w
-        - vm.max_map_count=262144
-        image: busybox:1.30
-        name: init-sysctl
-        resources:
-          limits:
-            cpu: 50m
-            memory: 50Mi
-          requests:
-            cpu: 50m
-            memory: 50Mi
-        securityContext:
-          runAsUser: 0
-          privileged: true
       volumes:
       - name: data
         emptyDir: {}

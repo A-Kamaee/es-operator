@@ -29,32 +29,16 @@ spec:
         application: elasticsearch
         role: master
     spec:
-      securityContext:
-        fsGroup: 1000
-      initContainers:
-      - name: init-sysctl
-        image: busybox
-        command:
-        - sysctl
-        - -w
-        - vm.max_map_count=262144
-        resources:
-          requests:
-            memory: 50Mi
-            cpu: 50m
-          limits:
-            memory: 50Mi
-            cpu: 50m
-        securityContext:
-          privileged: true
       containers:
       - name: elasticsearch
+        securityContext:
+          allowPrivilegeEscalation: false
         resources:
           requests:
-            memory: 600Mi
+            memory: 2000Mi
             cpu: 100m
           limits:
-            memory: 600Mi
+            memory: 2000Mi
         image: "docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2"
         env:
         - name: "node.name"
@@ -62,7 +46,7 @@ spec:
             fieldRef:
               fieldPath: metadata.name
         - name: "ES_JAVA_OPTS"
-          value: "-Xmx400m -Xms400m"
+          value: "-Xmx1400m -Xms1400m"
         - name: node.master
           value: "true"
         - name: node.data

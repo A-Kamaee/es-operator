@@ -34,6 +34,8 @@ spec:
       containers:
       - name: es-operator
         image: registry.opensource.zalan.do/poirot/es-operator:latest
+        args:
+          - --debug
         resources:
           limits:
             cpu: 20m
